@@ -1,0 +1,29 @@
+version: '3'
+services:
+  spring:
+    container_name: spring
+    restart: always
+    image: mclub4/spring
+    env_file:
+      - .env
+    ports:
+      - 8080:8080
+    depends_on:
+      redis:
+        condition: service_healthy
+
+  react:
+    container_name: react
+    image: mclub4/react
+    expose:
+      - 3000
+
+  nginx:
+    container_name: nginx
+    image: mclub4/nginx
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - "spring"
+      - "react"

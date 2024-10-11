@@ -1,4 +1,4 @@
-package com.anime.luminia.controller;
+package com.anime.luminia.global.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;

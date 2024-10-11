@@ -1,6 +1,7 @@
-package com.anime.luminia.controller;
+package com.anime.luminia.domain.anime.entity;
 
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -22,6 +23,11 @@ public class Anime {
     private String imageUrl;
     private Double score;
     private String source;
+    private String largeImageUrl;
+    private String trailerUrl;
+    private String rating;
+
+    @Column(columnDefinition = "TEXT")
     private String alternateTitles;
 }
 
