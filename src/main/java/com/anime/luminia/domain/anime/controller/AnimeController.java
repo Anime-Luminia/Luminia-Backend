@@ -5,10 +5,10 @@ import com.anime.luminia.domain.anime.entity.Anime;
 import com.anime.luminia.domain.anime.service.AnimeService;
 import com.anime.luminia.global.dto.ApiResult;
 import com.anime.luminia.global.error.exception.ErrorCode;
+import com.anime.luminia.global.util.Timer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -22,6 +22,7 @@ public class AnimeController {
 
     private final AnimeService animeService;
 
+    @Timer
     @GetMapping("/list")
     public ResponseEntity<ApiResult<AnimeListResponse>> getAnimeList(
             @RequestParam String sortBy,
@@ -31,7 +32,7 @@ public class AnimeController {
             @RequestParam(required = false) String searchQuery) {
 
         Pageable pageable = PageRequest.of(0, size);
-        Slice<Anime> animePage;
+        AnimeListResponse animePage;
 
         System.out.println(sortBy + " " + size + " " + lastKoreanName + " " + lastMalId + " " + searchQuery);
 
@@ -41,12 +42,12 @@ public class AnimeController {
             animePage = animeService.searchAnimeList(sortBy, lastKoreanName, lastMalId, searchQuery, pageable);
         }
 
-        AnimeListResponse response = new AnimeListResponse(animePage.getContent(), animePage.hasNext());
 
         return ResponseEntity.status(HttpStatus.OK)
-                .body(ApiResult.success("애니 목록을 성공적으로 가져왔습니다.", response));
+                .body(ApiResult.success("애니 목록을 성공적으로 가져왔습니다.", animePage));
     }
 
+    @Timer
     @GetMapping("/{malId}")
     public ResponseEntity<ApiResult<Optional<Anime>>> getAnimeById(@PathVariable Long malId) {
         Optional<Anime> anime = animeService.getAnimeById(malId);
