@@ -8,10 +8,6 @@ services:
       - .env
     ports:
       - 8080:8080
-    depends_on:
-      redis:
-        condition: service_healthy
-
   react:
     container_name: react
     image: mclub4/react

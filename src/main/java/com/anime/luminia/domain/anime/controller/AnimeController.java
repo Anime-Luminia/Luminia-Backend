@@ -4,12 +4,16 @@ import com.anime.luminia.domain.anime.dto.AnimeListResponse;
 import com.anime.luminia.domain.anime.entity.Anime;
 import com.anime.luminia.domain.anime.service.AnimeService;
 import com.anime.luminia.global.dto.ApiResult;
+import com.anime.luminia.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/anime")
@@ -19,12 +23,13 @@ public class AnimeController {
     private final AnimeService animeService;
 
     @GetMapping("/list")
-    public ApiResult<AnimeListResponse> getAnimeList(
+    public ResponseEntity<ApiResult<AnimeListResponse>> getAnimeList(
             @RequestParam String sortBy,
             @RequestParam Integer size,
             @RequestParam(required = false) String lastKoreanName,
             @RequestParam(required = false) Long lastMalId,
             @RequestParam(required = false) String searchQuery) {
+
         Pageable pageable = PageRequest.of(0, size);
         Slice<Anime> animePage;
 
@@ -33,19 +38,26 @@ public class AnimeController {
         if (searchQuery == null || searchQuery.isEmpty()) {
             animePage = animeService.getAnimeList(sortBy, lastKoreanName, lastMalId, pageable);
         } else {
-            animePage = animeService.searchAnimeList(sortBy, lastKoreanName, lastMalId, searchQuery,pageable);
+            animePage = animeService.searchAnimeList(sortBy, lastKoreanName, lastMalId, searchQuery, pageable);
         }
 
         AnimeListResponse response = new AnimeListResponse(animePage.getContent(), animePage.hasNext());
 
-        return ApiResult.success("애니 목록을 성공적으로 가져왔습니다.", response);
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(ApiResult.success("애니 목록을 성공적으로 가져왔습니다.", response));
     }
 
     @GetMapping("/{malId}")
-    public ResponseEntity<Anime> getAnimeById(@PathVariable Long malId) {
-        return animeService.getAnimeById(malId)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<ApiResult<Optional<Anime>>> getAnimeById(@PathVariable Long malId) {
+        Optional<Anime> anime = animeService.getAnimeById(malId);
+
+        if (anime.isPresent()) {
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(ApiResult.success("애니 정보를 성공적으로 가져왔습니다.", anime));
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(ApiResult.failure(ErrorCode.ENTITY_NOT_FOUND));
+        }
     }
 }
 

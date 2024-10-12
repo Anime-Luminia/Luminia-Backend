@@ -29,6 +29,9 @@ public class Anime {
 
     @Column(columnDefinition = "TEXT")
     private String alternateTitles;
+
+    @Column(columnDefinition = "TEXT")
+    private String special;
 }
 
 
