@@ -1,5 +1,6 @@
 package com.anime.luminia.domain.anime.service;
 
+import com.anime.luminia.domain.anime.dto.AnimeListItemResponse;
 import com.anime.luminia.domain.anime.dto.AnimeListResponse;
 import com.anime.luminia.domain.anime.entity.Anime;
 import com.anime.luminia.domain.anime.repository.AnimeRepository;
@@ -10,7 +11,9 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,14 +28,35 @@ public class AnimeService {
 
     @Cacheable(value = "animeListCache", key = "{#sortBy, #lastKoreanName, #lastMalId, #size}")
     public AnimeListResponse getAnimeList(String sortBy, String lastKoreanName, Long lastMalId, Pageable pageable) {
-        Slice<Anime> anime = animeRepository.findAllByCursor(sortBy, lastKoreanName, lastMalId, pageable);
+        Slice<Anime> animeSlice = animeRepository.findAllByCursor(sortBy, lastKoreanName, lastMalId, pageable);
 
-        return new AnimeListResponse(anime.getContent(), anime.hasNext());
+        List<AnimeListItemResponse> animeList = animeSlice.getContent().stream()
+                .map(anime -> new AnimeListItemResponse(
+                        anime.getMalId(),
+                        anime.getKoreanName(),
+                        anime.getProductionCompany(),
+                        anime.getImageUrl(),
+                        anime.getScore()
+                ))
+                .collect(Collectors.toList());
+
+        return new AnimeListResponse(animeList, animeSlice.hasNext());
     }
 
     public AnimeListResponse searchAnimeList(String sortBy, String lastKoreanName, Long lastMalId, String searchQuery, Pageable pageable) {
-        Slice<Anime> anime = animeRepository.searchByTitles(sortBy, lastKoreanName, searchQuery, lastMalId, pageable);
-        return new AnimeListResponse(anime.getContent(), anime.hasNext());
+        Slice<Anime> animeSlice = animeRepository.searchByTitles(sortBy, lastKoreanName, searchQuery, lastMalId, pageable);
+
+        List<AnimeListItemResponse> animeList = animeSlice.getContent().stream()
+                .map(anime -> new AnimeListItemResponse(
+                        anime.getMalId(),
+                        anime.getKoreanName(),
+                        anime.getProductionCompany(),
+                        anime.getImageUrl(),
+                        anime.getScore()
+                ))
+                .collect(Collectors.toList());
+
+        return new AnimeListResponse(animeList, animeSlice.hasNext());
     }
 
     // Anime 상세 정보 조회

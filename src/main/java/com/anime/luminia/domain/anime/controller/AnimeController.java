@@ -2,6 +2,9 @@ package com.anime.luminia.domain.anime.controller;
 
 import com.anime.luminia.domain.anime.dto.AnimeListResponse;
 import com.anime.luminia.domain.anime.entity.Anime;
+import com.anime.luminia.domain.anime.entity.type.AnimeGenreType;
+import com.anime.luminia.domain.anime.entity.type.AnimeRating;
+import com.anime.luminia.domain.anime.entity.type.AnimeType;
 import com.anime.luminia.domain.anime.service.AnimeService;
 import com.anime.luminia.global.dto.ApiResult;
 import com.anime.luminia.global.error.exception.ErrorCode;
@@ -13,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -29,14 +33,24 @@ public class AnimeController {
             @RequestParam Integer size,
             @RequestParam(required = false) String lastKoreanName,
             @RequestParam(required = false) Long lastMalId,
-            @RequestParam(required = false) String searchQuery) {
+            @RequestParam(required = false) String searchQuery,
+            @RequestParam(required = false) List<AnimeGenreType> includeGenres,
+            @RequestParam(required = false) List<AnimeGenreType> excludeGenres,
+            @RequestParam(required = false) List<AnimeType> types,
+            @RequestParam(required = false) List<AnimeRating> ratings,
+            @RequestParam(required = false) String source,
+            @RequestParam(required = false) String director,
+            @RequestParam(required = false) String producer,
+            @RequestParam(required = false) Boolean explicit) {
 
         Pageable pageable = PageRequest.of(0, size);
         AnimeListResponse animePage;
 
         System.out.println(sortBy + " " + size + " " + lastKoreanName + " " + lastMalId + " " + searchQuery);
 
-        if (searchQuery == null || searchQuery.isEmpty()) {
+        if (searchQuery == null && includeGenres == null && excludeGenres == null
+                && types == null && ratings == null && source == null
+                && director == null && producer == null && explicit == null) {
             animePage = animeService.getAnimeList(sortBy, lastKoreanName, lastMalId, pageable);
         } else {
             animePage = animeService.searchAnimeList(sortBy, lastKoreanName, lastMalId, searchQuery, pageable);

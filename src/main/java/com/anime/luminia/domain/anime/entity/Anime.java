@@ -1,15 +1,18 @@
 package com.anime.luminia.domain.anime.entity;
 
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.Getter;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "anime")
 @Getter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Anime {
 
     @Id
@@ -32,6 +35,12 @@ public class Anime {
 
     @Column(columnDefinition = "TEXT")
     private String special;
+
+    @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnimeGenre> genreMappings = new ArrayList<>();
+
+    @OneToOne(mappedBy = "anime", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private AnimePlot plot;
 }
 
 
