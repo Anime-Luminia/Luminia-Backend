@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -62,6 +63,7 @@ public class AnimeController {
     }
 
     @Timer
+    @Secured("ROLE_USER")
     @GetMapping("/{malId}")
     public ResponseEntity<ApiResult<Optional<Anime>>> getAnimeById(@PathVariable Long malId) {
         Optional<Anime> anime = animeService.getAnimeById(malId);

@@ -1,6 +1,8 @@
 package com.anime.luminia.domain.anime.entity;
 
 
+import com.anime.luminia.domain.review.Review;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -30,17 +32,23 @@ public class Anime {
     private String trailerUrl;
     private String rating;
 
+    @JsonIgnore
     @Column(columnDefinition = "TEXT")
     private String alternateTitles;
 
     @Column(columnDefinition = "TEXT")
     private String special;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnimeGenre> genreMappings = new ArrayList<>();
 
-    @OneToOne(mappedBy = "anime", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private AnimePlot plot;
+//    @OneToOne(mappedBy = "anime", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private AnimePlot plot;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 }
 
 

@@ -1,16 +1,91 @@
+enum ReviewTier {
+    S
+    A
+    B_PLUS
+    B
+    C_PLUS
+    C
+    D_PLUS
+    D
+    F
+}
+
+type CursorPageInfo {
+    hasNext: Boolean!
+}
+
+type ReviewConnection {
+    reviews: [Review!]!
+    pageInfo: CursorPageInfo!
+    stats: ReviewStats
+}
+
+type ReviewStats {
+    totalReviews: Int!
+    averageScore: Float!
+}
+#
+## 리뷰 타입
+type Review {
+    id: ID!
+    reviewText: String!
+    tier: ReviewTier!
+    createdAt: String
+    isSpoiler: Boolean!
+}
+#
+## 애니메이션 타입
+type Anime {
+    malId: ID!
+    koreanName: String
+    japanesesName: String
+    imageUrl: String
+}
+#
+## 유저 타입
+type LuminiaUser {
+    id: ID!
+    username: String!
+}
+
+## 정렬 기준
+enum SortedOrder {
+    LATEST
+    RECOMMENDED
+}
+
+# 리뷰 생성 input
+input reviewPostInput {
+    animeId: ID!
+    reviewText: String!
+    tier: ReviewTier!
+    isSpoiler: Boolean!
+}
+
+# 리뷰 업데이트 input
+input reviewUpdateInput {
+    reviewId: ID!
+    reviewText: String!
+    tier: ReviewTier!
+    isSpoiler: Boolean!
+}
+
 type Query {
-    bookById(id: ID): Book
+    # 첫 페이지에서만 stats를 받아오고 이후 페이지에서는 stats를 제외
+    getReviewsByAnime(animeId: ID!, after: String!, sortedOrder:SortedOrder! size: Int!):ReviewConnection!
+
+    # 유저가 쓴 리뷰들을 불러오는 쿼리
+    getReviewsByUser(userId: ID!, after: String, size: Int!): ReviewConnection!
 }
 
-type Book {
-    id: ID
-    name: String
-    pageCount: Int
-    author: Author
+type Mutation {
+    # 리뷰 작성
+    createReview(input: reviewPostInput!): Review!
+
+    # 리뷰 업데이트
+    updateReview(input: reviewUpdateInput!): Review!
+
+    # 리뷰 삭제
+    deleteReview(reviewId: ID!): Boolean!
 }
 
-type Author {
-    id: ID
-    firstName: String
-    lastName: String
-}
