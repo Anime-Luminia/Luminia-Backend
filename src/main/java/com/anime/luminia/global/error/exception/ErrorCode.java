@@ -45,7 +45,8 @@ public enum ErrorCode {
     HMAC_NOT_VALID(403, "HM001", "HMAC is not valid"),
 
     // Search Error
-    SEARCH_TOO_SHORT(400, "S001", "Search key word is too short")
+    SEARCH_TOO_SHORT(400, "S001", "Search key word is too short"),
+    REVIEW_EXIST(400, "R001", "User Already Written Review")
     ;
 
     private int status;

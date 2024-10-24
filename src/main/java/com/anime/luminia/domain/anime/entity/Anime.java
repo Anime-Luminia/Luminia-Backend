@@ -40,6 +40,7 @@ public class Anime {
     private String special;
 
     @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnimeGenre> genreMappings = new ArrayList<>();
 
@@ -47,6 +48,7 @@ public class Anime {
 //    private AnimePlot plot;
 
     @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "anime", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Review> reviews = new ArrayList<>();
 }

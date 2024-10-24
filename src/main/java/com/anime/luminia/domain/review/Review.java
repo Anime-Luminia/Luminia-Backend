@@ -2,6 +2,7 @@ package com.anime.luminia.domain.review;
 
 import com.anime.luminia.domain.anime.entity.Anime;
 import com.anime.luminia.domain.user.LuminiaUser;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -24,10 +25,10 @@ public class Review {
     @Column(nullable = false, length = 1000)
     private String reviewText;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ReviewTier tier;
+    private double tier;
 
+    @Builder.Default
     @Column(nullable = false)
     private Boolean isSpoiler = false;
 
@@ -35,18 +36,24 @@ public class Review {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @CreatedDate
+    @JsonIgnore
     @LastModifiedDate
     private LocalDateTime updatedAt;
 
-    // 관계 설정: 리뷰와 애니메이션 간의 관계 (다대일)
+    @JsonIgnore
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "anime_id", nullable = false)
     private Anime anime;
 
-    // 관계 설정: 리뷰와 작성자 간의 관계 (다대일)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private LuminiaUser luminiaUser;
+
+    public Review updateReview(String reviewText, ReviewTier tier, Boolean isSpoiler) {
+        this.reviewText = reviewText;
+        this.tier = tier.getScore();
+        this.isSpoiler = isSpoiler;
+        return this;
+    }
 }
 

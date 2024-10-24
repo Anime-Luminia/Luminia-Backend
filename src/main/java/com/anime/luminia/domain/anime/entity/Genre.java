@@ -19,6 +19,7 @@ public class Genre {
 
     private String name;
 
+    @Builder.Default
     @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AnimeGenre> animeMappings = new ArrayList<>();
 

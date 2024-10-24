@@ -40,7 +40,6 @@ public class ApiResult<T> {
         return ApiResult.<T>builder()
                 .success(false)
                 .code(error.getCode())
-                .message(error.getMessage())
                 .build();
     }
 }

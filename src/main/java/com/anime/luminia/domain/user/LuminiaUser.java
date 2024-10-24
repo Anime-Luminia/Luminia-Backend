@@ -9,9 +9,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 
 @Entity
 @Table(name = "users")
@@ -38,17 +36,23 @@ public class LuminiaUser implements Serializable, UserDetails {
     private String password;
 
     @JsonIgnore
-    @Column(nullable = false)
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private Set<Role> roles = new HashSet<>();
 
     @JsonIgnore
+    @Builder.Default
     @OneToMany(mappedBy = "luminiaUser", cascade = CascadeType.ALL, orphanRemoval = true)
     transient private List<Review> reviews = new ArrayList<>();
 
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + this.role.name()));
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        for (Role role : this.roles) {
+            authorities.add(new SimpleGrantedAuthority("ROLE_" + role.name()));
+        }
+        return authorities;
     }
 }

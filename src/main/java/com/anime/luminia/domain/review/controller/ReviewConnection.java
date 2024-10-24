@@ -14,4 +14,5 @@ public class ReviewConnection {
     private List<Review> reviews;
     private CursorPageInfo pageInfo;
     private ReviewStats stats;
+    private Review myReview;
 }

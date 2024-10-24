@@ -1,11 +1,18 @@
 package com.anime.luminia.domain.review.controller;
 
+import com.anime.luminia.domain.review.Review;
 import com.anime.luminia.domain.review.SortedOrder;
+import com.anime.luminia.domain.review.dto.ReviewPostInput;
+import com.anime.luminia.domain.review.dto.ReviewUpdateInput;
 import com.anime.luminia.domain.review.service.ReviewService;
+import com.anime.luminia.domain.user.LuminiaUser;
 import graphql.schema.DataFetchingEnvironment;
 import lombok.RequiredArgsConstructor;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 
 @Controller
@@ -20,27 +27,31 @@ public class ReviewController {
             @Argument String after,
             @Argument int size,
             @Argument SortedOrder sortedOrder,
+            @AuthenticationPrincipal LuminiaUser user,
             DataFetchingEnvironment env) {
 
         boolean isFirstPage = after == null;
         boolean statsRequested = env.getSelectionSet().contains("stats");
 
-        ReviewConnection reviewConnection = reviewService.getReviewsByAnime(animeId, after, size, sortedOrder, isFirstPage && statsRequested);
+        System.out.println(after + " " + isFirstPage + " " + statsRequested);
+
+        ReviewConnection reviewConnection = reviewService.getReviewsByAnime(animeId, after, size, sortedOrder,
+                isFirstPage && statsRequested, user);
 
         return reviewConnection;
     }
 
-//    @PreAuthorize("isAuthenticated()")
-//    @MutationMapping(name = "createReview")
-//    public Review createReview(@Argument ReviewPostInput input) {
-//        return reviewService.createReview(input);
-//    }
-//
-//    @PreAuthorize("isAuthenticated()")
-//    @MutationMapping(name = "updateReview")
-//    public Review updateReview(@Argument ReviewUpdateInput input) {
-//        return reviewService.updateReview(input);
-//    }
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping(name = "createReview")
+    public Review createReview(@Argument ReviewPostInput input, @AuthenticationPrincipal LuminiaUser user) {
+        return reviewService.createReview(input, user);
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @MutationMapping(name = "updateReview")
+    public Review updateReview(@Argument ReviewUpdateInput input, @AuthenticationPrincipal LuminiaUser user) {
+        return reviewService.updateReview(input, user);
+    }
 //
 //    @PreAuthorize("isAuthenticated()")
 //    @MutationMapping(name = "deleteReview")

@@ -30,7 +30,7 @@ public class CacheConfig {
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
-        return (builder) -> builder
+        return builder -> builder
                 .withCacheConfiguration("cache2",
                         RedisCacheConfiguration.defaultCacheConfig()
                                 .computePrefixWith(cacheName ->  "anime::" + cacheName + "::")

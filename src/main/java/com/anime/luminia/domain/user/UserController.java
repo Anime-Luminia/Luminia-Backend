@@ -1,26 +1,36 @@
 package com.anime.luminia.domain.user;
 
-import com.anime.luminia.domain.user.dto.RegisterRequest;
 import com.anime.luminia.global.dto.ApiResult;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/register")
-    public ResponseEntity<ApiResult<LuminiaUser>> register(@RequestBody @Valid RegisterRequest request) {
-        System.out.println(request.nickName() + " " + request.password() + " " + request.email());
-        LuminiaUser user = userService.registerUser(request);
+    @GetMapping("/me")
+    public ResponseEntity<ApiResult<LuminiaUser>> getMyProfile(@AuthenticationPrincipal LuminiaUser user) {
+        return ResponseEntity.ok(ApiResult.success("Successfully get Info",userService.getUserInfo(user.getId())));
+    }
 
-        return ResponseEntity.ok(ApiResult.success("Register Successful", user));
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/status")
+    public ResponseEntity<ApiResult<Boolean>> checkAuthStatus(@AuthenticationPrincipal LuminiaUser user) {
+        if(user == null) return ResponseEntity.ok(ApiResult.success("Non Authenticated", false));
+        else return ResponseEntity.ok(ApiResult.success("Authenticated", true));
+    }
+
+    @GetMapping("/hello")
+    public ResponseEntity<ApiResult<String>> hello() {
+        return ResponseEntity.ok(ApiResult.success("Hello"));
     }
 }

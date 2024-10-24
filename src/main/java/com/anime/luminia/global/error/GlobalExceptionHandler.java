@@ -1,5 +1,7 @@
 package com.anime.luminia.global.error;
 
+import com.anime.luminia.domain.auth.jwt.JwtTokenInvalidException;
+import com.anime.luminia.domain.auth.jwt.JwtTokenProvider;
 import com.anime.luminia.global.dto.ApiResult;
 import com.anime.luminia.global.error.exception.BusinessException;
 import com.anime.luminia.global.error.exception.ErrorCode;
@@ -47,6 +49,19 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResult<?>> handleMethodArgumentNotValidException(final MethodArgumentNotValidException e) {
         log.error("handleMethodArgumentNotValidException", e);
         final ErrorCode errorCode = ErrorCode.INVALID_JWT_TOKEN;
+        return ResponseEntity
+                .status(errorCode.getStatus())
+                .body(ApiResult.failure(errorCode));
+    }
+
+    /**
+     * 유효하지 않은 Token일 경우 발생
+     * {@link JwtTokenProvider}에서 try catch에 의해 넘어옵니다.
+     */
+    @ExceptionHandler(JwtTokenInvalidException.class)
+    protected ResponseEntity<ApiResult<?>> handleJwtTokenInvalidException(final JwtTokenInvalidException e){
+        log.error("handleJwtTokenInvalid", e);
+        final ErrorCode errorCode = e.getErrorCode();
         return ResponseEntity
                 .status(errorCode.getStatus())
                 .body(ApiResult.failure(errorCode));

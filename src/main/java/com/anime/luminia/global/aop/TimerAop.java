@@ -14,7 +14,7 @@ import org.springframework.util.StopWatch;
 @Component
 public class TimerAop {
     @Pointcut("@annotation(com.anime.luminia.global.util.Timer)")
-    private void timer(){};
+    private void timer(){}
 
     @Around("timer()")
     public Object timerAround(ProceedingJoinPoint joinPoint) throws Throwable {

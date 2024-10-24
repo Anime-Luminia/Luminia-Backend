@@ -8,8 +8,9 @@ public enum ReviewTier {
     B("B", 3.0),
     C_PLUS("C+", 2.5),
     C("C", 2.0),
+    D_PLUS("D+", 1.5),
     D("D", 1.0),
-    F("F", 0.5);
+    F("F", 0.0);
 
     private final String name;
     private final double score;

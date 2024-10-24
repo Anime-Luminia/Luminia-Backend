@@ -13,7 +13,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -26,7 +25,8 @@ public class AnimeService {
         this.animeRepository = animeRepository;
     }
 
-    @Cacheable(value = "animeListCache", key = "{#sortBy, #lastKoreanName, #lastMalId, #size}")
+    @Cacheable(value = "animeListCache", key = "{#sortBy, #lastKoreanName, #lastMalId, #size}",
+            condition = "#sortBy.equals('koreanName') && #lastKoreanName == null && #lastMalId == null")
     public AnimeListResponse getAnimeList(String sortBy, String lastKoreanName, Long lastMalId, Pageable pageable) {
         Slice<Anime> animeSlice = animeRepository.findAllByCursor(sortBy, lastKoreanName, lastMalId, pageable);
 
@@ -38,7 +38,7 @@ public class AnimeService {
                         anime.getImageUrl(),
                         anime.getScore()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new AnimeListResponse(animeList, animeSlice.hasNext());
     }
@@ -54,7 +54,7 @@ public class AnimeService {
                         anime.getImageUrl(),
                         anime.getScore()
                 ))
-                .collect(Collectors.toList());
+                .toList();
 
         return new AnimeListResponse(animeList, animeSlice.hasNext());
     }
