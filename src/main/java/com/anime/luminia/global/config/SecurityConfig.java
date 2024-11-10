@@ -30,7 +30,7 @@ public class SecurityConfig {
 
     private static final String[] AUTH_WHITELIST ={
             "/graphql", "/graphiql/*", "/user/hello", "/graphiql", "/favicon.ico", "/anime/*",
-            "/auth/register", "/auth/login", "/auth/reissue"
+            "/auth/register", "/auth/login", "/auth/reissue", "/graphql/*"
     };
 
 

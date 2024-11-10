@@ -4,6 +4,7 @@ import com.anime.luminia.domain.auth.jwt.JwtTokenProvider;
 import com.anime.luminia.global.error.exception.BusinessException;
 import com.anime.luminia.global.error.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -11,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+@Slf4j
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -33,6 +35,7 @@ public class UserService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        log.info("hi");
         return userRepository.findByEmail(email).
                 orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
     }

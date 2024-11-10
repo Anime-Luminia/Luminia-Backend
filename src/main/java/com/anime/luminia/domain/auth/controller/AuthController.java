@@ -10,7 +10,6 @@ import com.anime.luminia.global.util.Timer;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -51,11 +50,11 @@ public class AuthController {
 
     @PostMapping("/logout")
     public ResponseEntity<ApiResult<String>> logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String accessToken,
-                                                    @RequestBody @NotBlank String refreshToken) {
+                                                    HttpServletRequest request, HttpServletResponse response) {
         if (StringUtils.hasText(accessToken) && accessToken.startsWith("Bearer ")) {
             accessToken =  accessToken.substring(7);
         }
-        authService.logout(accessToken, refreshToken);
+        authService.logout(accessToken, request, response);
 
         return ResponseEntity
                 .ok(ApiResult.success("Successfully logout token", "Logout successful"));
@@ -63,7 +62,6 @@ public class AuthController {
 
     @GetMapping("/status")
     public ResponseEntity<ApiResult<Boolean>> checkAuthStatus(@AuthenticationPrincipal LuminiaUser user) {
-        System.out.println("컴온 베이비");
         if(user == null) return ResponseEntity.ok(ApiResult.success("Non Authenticated", false));
         else return ResponseEntity.ok(ApiResult.success("Authenticated", true));
     }

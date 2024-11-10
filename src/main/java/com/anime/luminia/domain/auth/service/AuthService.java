@@ -16,6 +16,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -40,10 +41,14 @@ public class AuthService {
     private final RedisTemplate<String, String> redisTemplate;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${jwt.token.access-expiration-time}")
+    private Long accessTokenExpirationTime;
+
+    @Value("${jwt.token.refresh-expiration-time}")
+    private Long refreshTokenExpirationTime;
+
     public TokenResponse reissueToken(HttpServletRequest request, HttpServletResponse response) {
         String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
-
-        System.out.println(refreshToken);
 
         if(!StringUtils.hasText(refreshToken)) throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN);
 
@@ -52,13 +57,11 @@ public class AuthService {
         Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
         PrincipalDetails principalDetails;
 
-        System.out.println(authentication.getPrincipal());
-
         if (authentication.getPrincipal() instanceof PrincipalDetails) {
             principalDetails = (PrincipalDetails) authentication.getPrincipal();
         } else throw new BusinessException(ErrorCode.INVALID_JWT_TOKEN);
 
-        String redisRefreshToken = redisTemplate.opsForValue().get(String.valueOf("refreshToken::" + principalDetails.getUserId()));
+        String redisRefreshToken = redisTemplate.opsForValue().get(("refreshToken::" + principalDetails.getUserId()));
         if (redisRefreshToken == null || !redisRefreshToken.equals(refreshToken)) {
             throw new BusinessException(ErrorCode.INVALID_JWT_TOKEN);
         }
@@ -68,7 +71,7 @@ public class AuthService {
                 response,
                 COOKIE_REFRESH_TOKEN,
                 newRefreshToken,
-                (int) TimeUnit.MILLISECONDS.toSeconds(20000000));
+                (int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpirationTime));
 
         return new TokenResponse(
                 jwtTokenProvider.generateAccessToken(principalDetails)
@@ -108,18 +111,30 @@ public class AuthService {
                 response,
                 COOKIE_REFRESH_TOKEN,
                 refreshToken,
-                (int) TimeUnit.MILLISECONDS.toSeconds(20000000));
+                (int) TimeUnit.MILLISECONDS.toSeconds(refreshTokenExpirationTime));
 
         return new TokenResponse(accessToken);
     }
 
-    public void logout(String accessToken, String refreshToken) {
+    public void logout(String accessToken, HttpServletRequest request,
+                       HttpServletResponse response) {
+        String refreshToken = jwtTokenProvider.resolveRefreshToken(request);
         jwtTokenProvider.validateToken(refreshToken);
 
         Claims claims = jwtTokenProvider.parseClaims(refreshToken);
-        String userId = claims.get(claims.getSubject(), String.class);
-        redisTemplate.opsForValue().getAndDelete(userId);
+        String userId = String.valueOf(claims.getSubject());
+        String key = "refreshToken::" + userId;
+        log.info(key);
 
-        redisTemplate.opsForValue().set(accessToken, "logout");
+        if (Boolean.TRUE.equals(redisTemplate.hasKey(key))) {
+            redisTemplate.opsForValue().getAndDelete(key);
+        } else {
+            throw new BusinessException(ErrorCode.NOT_EXIST_REFRESH_TOKEN);
+        }
+
+        redisTemplate.opsForValue().set(accessToken, "logout", accessTokenExpirationTime,
+                TimeUnit.MILLISECONDS);
+
+        CookieUtils.deleteCookie(request, response, CookieUtils.COOKIE_REFRESH_TOKEN);
     }
 }

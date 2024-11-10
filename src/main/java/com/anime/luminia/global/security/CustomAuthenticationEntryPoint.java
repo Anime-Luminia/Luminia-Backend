@@ -24,8 +24,6 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException, ServletException {
-        log.error("No Authentication Request", authException);
-
         ApiResult<Void> errorResponse = ApiResult.failure(ErrorCode.USER_NOT_FOUND);
 
         String responseBody = objectMapper.writeValueAsString(errorResponse);

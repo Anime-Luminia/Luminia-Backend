@@ -104,16 +104,10 @@ public class JwtTokenProvider {
             Jwts.parserBuilder().setSigningKey(jwtSecret).build().parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
-            System.out.println("걸렸당" + e.getMessage());
             throw JwtTokenInvalidException.INSTANCE;
         }
     }
 
-    /**
-     * DB 조회가 이뤄진다면 JWT 토큰의 장점을 얻어가지 못한다.
-     *
-     * @link https://velog.io/@tlatldms/%EC%84%9C%EB%B2%84%EA%B0%9C%EB%B0%9C%EC%BA%A0%ED%94%84-Spring-security-refreshing-JWT-DB%EC%A0%91%EA%B7%BC%EC%97%86%EC%9D%B4-%EC%9D%B8%EC%A6%9D%EA%B3%BC-%ED%8C%8C%EC%8B%B1%ED%95%98%EA%B8%B0
-     */
     public Authentication getAuthentication(String accessToken) {
         Claims claims = this.parseClaims(accessToken);
 
@@ -147,6 +141,11 @@ public class JwtTokenProvider {
     public String resolveRefreshToken(HttpServletRequest request) {
         Optional<Cookie> cookie = CookieUtils.getCookie(request, CookieUtils.COOKIE_REFRESH_TOKEN);
         return cookie.map(Cookie::getValue).orElse("");
+    }
+
+    public boolean isTokenBlacked(String accessToken) {
+        String isLogout = (String) redisTemplate.opsForValue().get(accessToken);
+        return isLogout != null && isLogout.equals("logout");
     }
 }
 
